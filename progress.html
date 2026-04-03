@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualVoice — Progress</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --green-dark:#1a7a2e;--green-mid:#2ecc54;--green-light:#57e07a;
+            --gold:#FFD700;--gold-dark:#d4a800;--bg:#0f1f13;--sidebar-bg:#111d15;
+            --card-bg:#162a1b;--border:#243d2b;--text:#e8f5ec;--muted:#7aad88;
+            --danger:#ff4757;--streak:#ff6b35;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+
+        /* ── SIDEBAR ── */
+        .sidebar{width:240px;min-height:100vh;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform 0.3s;}
+        .sidebar-logo{font-family:'Fredoka One',cursive;font-size:1.7rem;color:var(--green-mid);padding:0.5rem 0.5rem 1.5rem;display:flex;align-items:center;gap:0.5rem;}
+        .sidebar-nav{flex:1;}
+        .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:14px;margin-bottom:0.3rem;cursor:pointer;transition:all 0.2s;color:var(--muted);font-weight:700;font-size:0.95rem;text-decoration:none;border:2px solid transparent;}
+        .nav-item:hover{background:rgba(46,204,84,0.08);color:var(--green-light);}
+        .nav-item.active{background:rgba(46,204,84,0.15);color:var(--green-mid);border-color:rgba(46,204,84,0.25);}
+        .nav-item i{width:20px;text-align:center;}
+        .nav-divider{height:1px;background:var(--border);margin:0.8rem 0.5rem;}
+        .sidebar-user{background:var(--card-bg);border-radius:16px;padding:1rem;border:1px solid var(--border);margin-top:auto;}
+        .user-info{display:flex;align-items:center;gap:0.75rem;}
+        .user-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--green-mid),var(--green-dark));display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:900;color:#fff;border:2px solid var(--gold);flex-shrink:0;}
+        .user-name{font-size:0.88rem;font-weight:800;color:var(--text);}
+        .user-level{font-size:0.72rem;color:var(--muted);font-weight:600;}
+
+        /* ── MAIN ── */
+        .main{margin-left:240px;flex:1;padding:2rem;max-width:calc(100vw - 240px);overflow-x:hidden;}
+        .page-title{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--text);margin-bottom:0.3rem;}
+        .page-sub{color:var(--muted);font-size:0.9rem;font-weight:600;margin-bottom:2rem;}
+
+        /* ── STAT CARDS ROW ── */
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+        .stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:1.5rem;text-align:center;transition:all 0.2s;}
+        .stat-card:hover{border-color:var(--green-mid);transform:translateY(-2px);}
+        .stat-card .val{font-family:'Fredoka One',cursive;font-size:2.2rem;display:block;margin-bottom:0.2rem;}
+        .stat-card .lbl{font-size:0.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+        .val-green{color:var(--green-mid);}
+        .val-gold{color:var(--gold);}
+        .val-streak{color:var(--streak);}
+        .val-blue{color:#4a9eff;}
+
+        /* ── LEAGUE CARD ── */
+        .league-card{background:linear-gradient(135deg,#1c3322,#162a1b);border:1px solid var(--border);border-radius:20px;padding:1.5rem 2rem;margin-bottom:2rem;position:relative;overflow:hidden;}
+        .league-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(255,215,0,0.15),transparent 70%);border-radius:50%;}
+        .league-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+        .league-name{font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--gold);}
+        .league-icon{font-size:2.5rem;}
+        .league-sub{font-size:0.82rem;font-weight:700;color:var(--muted);margin-bottom:1rem;}
+        .xp-bar-track{width:100%;height:14px;background:rgba(255,255,255,0.07);border-radius:20px;overflow:hidden;margin-bottom:0.5rem;}
+        .xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),#ffe760);border-radius:20px;transition:width 1s ease;box-shadow:0 0 12px rgba(255,215,0,0.4);}
+        .xp-bar-labels{display:flex;justify-content:space-between;font-size:0.78rem;font-weight:800;color:var(--muted);}
+
+        /* ── SECTION ── */
+        .section{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;}
+        .section-title{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin-bottom:1.2rem;display:flex;align-items:center;gap:0.5rem;}
+
+        /* ── UNIT PROGRESS ROWS ── */
+        .unit-row{display:flex;align-items:center;gap:1rem;padding:0.8rem;border-radius:14px;margin-bottom:0.75rem;background:rgba(255,255,255,0.03);border:1px solid transparent;transition:all 0.2s;}
+        .unit-row:last-child{margin-bottom:0;}
+        .unit-row:hover{border-color:var(--border);background:rgba(255,255,255,0.05);}
+        .unit-icon-box{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+        .icon-green{background:rgba(46,204,84,0.15);}
+        .icon-gold{background:rgba(255,215,0,0.12);}
+        .icon-gray{background:rgba(255,255,255,0.05);}
+        .unit-info{flex:1;}
+        .unit-name{font-size:0.9rem;font-weight:800;color:var(--text);margin-bottom:0.3rem;}
+        .unit-bar-track{height:8px;background:rgba(255,255,255,0.07);border-radius:20px;overflow:hidden;}
+        .unit-bar-fill{height:100%;border-radius:20px;transition:width 0.8s ease;}
+        .fill-green{background:linear-gradient(90deg,var(--green-dark),var(--green-mid));}
+        .fill-gold{background:linear-gradient(90deg,var(--gold-dark),var(--gold));}
+        .fill-gray{background:rgba(255,255,255,0.15);}
+        .unit-pct{font-size:0.82rem;font-weight:900;color:var(--muted);white-space:nowrap;min-width:36px;text-align:right;}
+
+        /* ── STREAK CALENDAR ── */
+        .streak-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:0.4rem;}
+        .cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:var(--muted);background:rgba(255,255,255,0.04);border:1px solid transparent;flex-direction:column;gap:2px;}
+        .cal-day.done{background:rgba(255,107,53,0.25);border-color:rgba(255,107,53,0.4);color:var(--streak);}
+        .cal-day.today{background:rgba(255,107,53,0.4);border-color:var(--streak);color:#fff;}
+        .cal-day-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+        .cal-day-label{font-size:0.6rem;}
+        .streak-big{text-align:center;margin-bottom:1.2rem;}
+        .streak-num{font-family:'Fredoka One',cursive;font-size:3.5rem;color:var(--streak);line-height:1;display:block;}
+        .streak-lbl{font-size:0.85rem;font-weight:800;color:#ff9a72;}
+
+        /* ── ACCURACY SECTION ── */
+        .accuracy-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .acc-item{background:rgba(255,255,255,0.03);border-radius:14px;padding:1rem;border:1px solid var(--border);text-align:center;}
+        .acc-val{font-family:'Fredoka One',cursive;font-size:1.8rem;display:block;margin-bottom:0.2rem;}
+        .acc-lbl{font-size:0.75rem;font-weight:800;color:var(--muted);text-transform:uppercase;}
+
+        /* ── MOBILE ── */
+        .mobile-header{display:none;position:fixed;top:0;left:0;right:0;background:var(--sidebar-bg);border-bottom:1px solid var(--border);padding:1rem 1.5rem;z-index:200;align-items:center;justify-content:space-between;}
+        .mobile-logo{font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--green-mid);}
+        .hamburger{background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer;}
+
+        /* ── LOADING ── */
+        .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:1rem;}
+        .loading-logo{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--green-mid);}
+        .loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--green-mid);border-radius:50%;animation:spin 0.8s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+
+        @media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.main{margin-left:0;padding:1rem;padding-top:5rem;max-width:100vw;}.mobile-header{display:flex;}.accuracy-grid{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-logo">🤟 VisualVoice</div>
+    <div class="loading-spinner"></div>
+</div>
+
+<header class="mobile-header">
+    <div class="mobile-logo">🤟 VisualVoice</div>
+    <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+</header>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span>🤟</span> VisualVoice</div>
+    <nav class="sidebar-nav">
+        <a class="nav-item" href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+        <a class="nav-item" href="learn.html"><i class="fas fa-graduation-cap"></i> Learn</a>
+        <a class="nav-item" href="practice.html"><i class="fas fa-camera"></i> Practice</a>
+        <a class="nav-item active" href="progress.html"><i class="fas fa-chart-bar"></i> Progress</a>
+        <a class="nav-item" href="trophies.html"><i class="fas fa-trophy"></i> Trophies</a>
+        <a class="nav-item" href="leaderboard.html"><i class="fas fa-users"></i> Leaderboard</a>
+        <div class="nav-divider"></div>
+        <a class="nav-item" href="#"><i class="fas fa-store"></i> Shop</a>
+        <a class="nav-item" href="#"><i class="fas fa-cog"></i> Settings</a>
+        <a class="nav-item" id="logout-link" href="#"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="user-info">
+            <div class="user-avatar" id="sb-avatar">?</div>
+            <div>
+                <div class="user-name" id="sb-name">Loading...</div>
+                <div class="user-level" id="sb-level">⚡ 0 XP</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="page-title">📊 Your Progress</div>
+    <div class="page-sub" id="page-sub">Loading your stats...</div>
+
+    <!-- Top stat cards -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <span class="val val-gold" id="s-xp">—</span>
+            <span class="lbl">Total XP</span>
+        </div>
+        <div class="stat-card">
+            <span class="val val-streak" id="s-streak">—</span>
+            <span class="lbl">Day Streak</span>
+        </div>
+        <div class="stat-card">
+            <span class="val val-green" id="s-lessons">—</span>
+            <span class="lbl">Lessons Done</span>
+        </div>
+        <div class="stat-card">
+            <span class="val val-blue" id="s-trophies">—</span>
+            <span class="lbl">Trophies</span>
+        </div>
+    </div>
+
+    <!-- League progress -->
+    <div class="league-card">
+        <div class="league-header">
+            <div>
+                <div class="league-name" id="league-name">Bronze League</div>
+                <div class="league-sub" id="league-sub">Keep earning XP to climb!</div>
+            </div>
+            <div class="league-icon" id="league-icon">🥉</div>
+        </div>
+        <div class="xp-bar-track">
+            <div class="xp-bar-fill" id="league-bar" style="width:0%"></div>
+        </div>
+        <div class="xp-bar-labels">
+            <span id="xp-earned">0 XP</span>
+            <span id="xp-next-label">500 XP to Silver</span>
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+
+        <!-- Unit progress -->
+        <div class="section">
+            <div class="section-title">📚 Unit Progress</div>
+            <div id="unit-list"></div>
+        </div>
+
+        <!-- Streak calendar -->
+        <div class="section">
+            <div class="section-title">🔥 Streak</div>
+            <div class="streak-big">
+                <span class="streak-num" id="streak-num">0</span>
+                <span class="streak-lbl" id="streak-lbl">Day streak</span>
+            </div>
+            <div class="streak-calendar" id="streak-cal"></div>
+        </div>
+
+    </div>
+
+    <!-- Accuracy -->
+    <div class="section" style="margin-top:1.5rem;">
+        <div class="section-title">🎯 Performance</div>
+        <div class="accuracy-grid">
+            <div class="acc-item">
+                <span class="acc-val val-green" id="perf-league">Bronze</span>
+                <span class="acc-lbl">Current League</span>
+            </div>
+            <div class="acc-item">
+                <span class="acc-val val-gold" id="perf-weekly">0</span>
+                <span class="acc-lbl">Weekly XP</span>
+            </div>
+            <div class="acc-item">
+                <span class="acc-val val-blue" id="perf-hearts">5</span>
+                <span class="acc-lbl">Hearts Remaining</span>
+            </div>
+            <div class="acc-item">
+                <span class="acc-val" style="color:#a78bfa;" id="perf-gems">0</span>
+                <span class="acc-lbl">Gems</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script type="module">
+    import { requireAuth, logOut } from './auth.js';
+    import { getUserProgress } from './progress.js';
+
+    const user = await requireAuth();
+    document.getElementById('logout-link').addEventListener('click', async e => { e.preventDefault(); await logOut(); });
+
+    const prog = await getUserProgress(user.uid);
+    document.getElementById('loading-overlay').style.display = 'none';
+
+    // Sidebar
+    const init = (prog.name || 'U')[0].toUpperCase();
+    document.getElementById('sb-avatar').textContent = init;
+    document.getElementById('sb-name').textContent = prog.name;
+    document.getElementById('sb-level').textContent = `⚡ ${prog.xp} XP · ${prog.league}`;
+
+    // Page sub
+    document.getElementById('page-sub').textContent = `Here's how you're doing, ${prog.name.split(' ')[0]}!`;
+
+    // Top stats
+    document.getElementById('s-xp').textContent = prog.xp;
+    document.getElementById('s-streak').textContent = prog.streak;
+    document.getElementById('s-lessons').textContent = prog.lessonsCompleted;
+    document.getElementById('s-trophies').textContent = prog.trophies.length;
+
+    // League bar
+    const li = prog.xpToNextLeague;
+    const leagueIcons = { Bronze:'🥉', Silver:'🥈', Gold:'🥇', Diamond:'💎' };
+    document.getElementById('league-name').textContent = `${prog.league} League`;
+    document.getElementById('league-icon').textContent = leagueIcons[prog.league] || '🏅';
+    document.getElementById('perf-league').textContent = prog.league;
+    if (li.next) {
+        const pct = Math.min(100, Math.round((li.current / li.goal) * 100));
+        document.getElementById('league-sub').textContent = `${li.needed} XP to reach ${li.next}`;
+        document.getElementById('league-bar').style.width = pct + '%';
+        document.getElementById('xp-earned').textContent = prog.xp + ' XP total';
+        document.getElementById('xp-next-label').textContent = `${li.needed} XP to ${li.next}`;
+        setTimeout(() => document.getElementById('league-bar').style.width = pct + '%', 300);
+    } else {
+        document.getElementById('league-sub').textContent = 'Maximum league reached! 💎';
+        document.getElementById('league-bar').style.width = '100%';
+        document.getElementById('xp-next-label').textContent = 'Diamond — Max!';
+    }
+
+    // Unit progress
+    const UNITS = [
+        { id:'unit-basics',   icon:'🌱', name:'Basic Greetings',        total:4  },
+        { id:'unit-alphabet', icon:'🌿', name:'Alphabet & Numbers',     total:7  },
+        { id:'unit-phrases',  icon:'🌳', name:'Common Phrases',         total:4  },
+        { id:'unit-advanced', icon:'🏔️', name:'Advanced Conversations', total:3  },
+    ];
+    const unitList = document.getElementById('unit-list');
+    UNITS.forEach(u => {
+        const done = (prog.unitProgress[u.id]?.lessonsComplete || []).length;
+        const pct = Math.min(100, Math.round((done / u.total) * 100));
+        const isDone = done >= u.total;
+        const isCurrent = !isDone && UNITS.findIndex(x => x.id === u.id) <=
+            UNITS.findIndex(x => (prog.unitProgress[x.id]?.lessonsComplete || []).length < x.total);
+        const iconClass = isDone ? 'icon-green' : isCurrent ? 'icon-gold' : 'icon-gray';
+        const fillClass = isDone ? 'fill-green' : isCurrent ? 'fill-gold' : 'fill-gray';
+        const row = document.createElement('div');
+        row.className = 'unit-row';
+        row.innerHTML = `
+            <div class="unit-icon-box ${iconClass}">${u.icon}</div>
+            <div class="unit-info">
+                <div class="unit-name">${u.name}</div>
+                <div class="unit-bar-track">
+                    <div class="unit-bar-fill ${fillClass}" style="width:${pct}%"></div>
+                </div>
+            </div>
+            <div class="unit-pct" style="color:${isDone?'var(--green-mid)':isCurrent?'var(--gold)':'var(--muted)'}">${isDone?'✓':pct+'%'}</div>
+        `;
+        unitList.appendChild(row);
+    });
+
+    // Streak calendar (last 28 days = 4 weeks)
+    const cal = document.getElementById('streak-cal');
+    document.getElementById('streak-num').textContent = prog.streak;
+    document.getElementById('streak-lbl').textContent = prog.streak === 1 ? 'Day streak — just started!' : 'Day streak!';
+    const dayNames = ['M','T','W','T','F','S','S'];
+    const today = new Date();
+    for (let i = 27; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const dayOfWeek = d.getDay();
+        const adj = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const isToday = i === 0;
+        // Mark done if within streak window
+        const withinStreak = i < prog.streak;
+        const div = document.createElement('div');
+        div.className = `cal-day ${isToday ? 'today' : withinStreak ? 'done' : ''}`;
+        div.innerHTML = `<span class="cal-day-dot"></span><span class="cal-day-label">${dayNames[adj]}</span>`;
+        cal.appendChild(div);
+    }
+
+    // Performance
+    document.getElementById('perf-weekly').textContent = prog.weeklyXp;
+    document.getElementById('perf-hearts').textContent = prog.hearts;
+    document.getElementById('perf-gems').textContent = prog.gems;
+</script>
+</body>
+</html>

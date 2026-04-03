@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualVoice — Practice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --green-dark: #1a7a2e;
+            --green-mid: #2ecc54;
+            --green-light: #57e07a;
+            --gold: #FFD700;
+            --gold-dark: #d4a800;
+            --bg: #0f1f13;
+            --card-bg: #162a1b;
+            --card-bg2: #1c3322;
+            --border: #243d2b;
+            --text: #e8f5ec;
+            --muted: #7aad88;
+            --danger: #ff4757;
+            --streak: #ff6b35;
+            --correct: #2ecc54;
+            --wrong: #ff4757;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== TOP NAV ===== */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .back-btn {
+            display: flex; align-items: center; gap: 0.5rem;
+            color: var(--muted); font-weight: 700; font-size: 0.9rem;
+            text-decoration: none; cursor: pointer;
+            background: none; border: none;
+            transition: color 0.2s;
+        }
+        .back-btn:hover { color: var(--text); }
+
+        .progress-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .progress-track {
+            flex: 1;
+            height: 10px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 99px;
+            overflow: hidden;
+            max-width: 400px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green-mid), var(--green-light));
+            border-radius: 99px;
+            transition: width 0.6s ease;
+        }
+        .progress-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .nav-hearts {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+        .heart { font-size: 1.1rem; transition: transform 0.2s; }
+        .heart.lost { filter: grayscale(1); opacity: 0.35; }
+
+        /* ===== MAIN LAYOUT ===== */
+        .practice-layout {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 1.5rem;
+            padding: 1.5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ===== LEFT PANEL — WEBCAM ===== */
+        .webcam-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .target-sign-card {
+            background: var(--card-bg2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .target-emoji {
+            font-size: 3rem;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+        }
+
+        .target-info { flex: 1; }
+        .target-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .target-sign-name {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            color: var(--text);
+            line-height: 1;
+        }
+        .target-hint {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--muted);
+            margin-top: 0.2rem;
+        }
+
+        .target-skip {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.5rem 0.9rem;
+            color: var(--muted);
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .target-skip:hover { color: var(--text); border-color: var(--text); }
+
+        /* Webcam container */
+        .webcam-container {
+            position: relative;
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            border: 3px solid var(--border);
+            transition: border-color 0.4s ease;
+        }
+
+        .webcam-container.detecting { border-color: var(--gold); }
+        .webcam-container.correct { border-color: var(--correct); box-shadow: 0 0 0 4px rgba(46,204,84,0.2); }
+        .webcam-container.wrong { border-color: var(--wrong); box-shadow: 0 0 0 4px rgba(255,71,87,0.2); }
+
+        #webcam-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror */
+        }
+
+        #webcam-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            transform: scaleX(-1);
+        }
+
+        /* Overlay states */
+        .webcam-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.75);
+            gap: 1rem;
+            transition: opacity 0.3s;
+        }
+        .webcam-overlay.hidden { opacity: 0; pointer-events: none; }
+
+        .overlay-icon { font-size: 3rem; }
+        .overlay-text {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.4rem;
+            color: #fff;
+            text-align: center;
+        }
+        .overlay-sub {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            max-width: 260px;
+        }
+
+        .start-webcam-btn {
+            background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 0.8rem 2rem;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .start-webcam-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(46,204,84,0.35); }
+
+        /* Detection status bar */
+        .detection-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 0.9rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .detection-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--muted);
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+        .detection-dot.active { background: var(--green-mid); animation: blink 1s ease-in-out infinite; }
+        .detection-dot.correct { background: var(--correct); animation: none; }
+        .detection-dot.wrong { background: var(--wrong); animation: none; }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .detection-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text);
+            flex: 1;
+        }
+        .detection-confidence {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.1rem;
+            color: var(--green-light);
+        }
+
+        /* Confidence meter */
+        .confidence-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green-mid), var(--green-light));
+            border-radius: 99px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* ===== RIGHT PANEL — LESSON ===== */
+        .lesson-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .lesson-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .section-label {
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.8rem;
+        }
+
+        /* Sign display card */
+        .sign-display {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--card-bg2);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .sign-display::before {
+            content: '';
+            position: absolute;
+            top: -30px; left: 50%;
+            transform: translateX(-50%);
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(46,204,84,0.08), transparent 70%);
+            border-radius: 50%;
+        }
+
+        .sign-big-emoji {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+            animation: signFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes signFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .sign-letter {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3.5rem;
+            color: var(--green-light);
+            line-height: 1;
+        }
+        .sign-word {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.4rem;
+            color: var(--text);
+            margin-top: 0.3rem;
+        }
+
+        /* Steps / instructions */
+        .steps-list { display: flex; flex-direction: column; gap: 0.6rem; }
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+            padding: 0.6rem 0.8rem;
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: var(--muted);
+            transition: all 0.3s;
+        }
+        .step-item.active { background: rgba(46,204,84,0.1); color: var(--text); border: 1px solid rgba(46,204,84,0.2); }
+        .step-item.done { color: var(--green-mid); }
+        .step-num {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 900;
+            flex-shrink: 0;
+            color: var(--muted);
+        }
+        .step-item.active .step-num { background: var(--green-mid); color: #fff; }
+        .step-item.done .step-num { background: rgba(46,204,84,0.2); color: var(--green-mid); }
+
+        /* Result feedback */
+        .result-card {
+            border-radius: 20px;
+            padding: 1.2rem;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+            text-align: center;
+        }
+        .result-card.show { display: flex; animation: popIn 0.3s ease; }
+        .result-card.correct-card { background: rgba(46,204,84,0.12); border: 2px solid rgba(46,204,84,0.35); }
+        .result-card.wrong-card { background: rgba(255,71,87,0.1); border: 2px solid rgba(255,71,87,0.25); }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.94) translateY(6px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .result-emoji { font-size: 2.5rem; }
+        .result-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.3rem;
+        }
+        .result-title.correct-text { color: var(--green-mid); }
+        .result-title.wrong-text { color: var(--wrong); }
+        .result-sub { font-size: 0.82rem; font-weight: 700; color: var(--muted); }
+        .result-xp {
+            background: rgba(255,215,0,0.15);
+            border: 1px solid rgba(255,215,0,0.3);
+            color: var(--gold);
+            font-family: 'Fredoka One', cursive;
+            font-size: 1rem;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.1rem;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+        .next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(46,204,84,0.35); }
+
+        /* Capture button */
+        .capture-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #2a5c1a, #1f8c3a);
+            border: 2px solid var(--green-mid);
+            color: #fff;
+            border-radius: 14px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.6rem;
+            transition: all 0.2s;
+        }
+        .capture-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(46,204,84,0.35); }
+        .capture-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Score tracker */
+        .score-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .score-pill {
+            flex: 1;
+            background: var(--card-bg2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0.8rem;
+            text-align: center;
+        }
+        .score-pill .score-val {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem;
+        }
+        .score-pill .score-lbl {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .correct-score .score-val { color: var(--green-mid); }
+        .wrong-score .score-val { color: var(--wrong); }
+        .xp-score .score-val { color: var(--gold); }
+
+        /* ===== CELEBRATION OVERLAY ===== */
+        .celebration {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.85);
+        }
+        .celebration.show { display: flex; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .celebration-card {
+            background: var(--card-bg2);
+            border: 3px solid var(--gold);
+            border-radius: 28px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            max-width: 380px;
+            box-shadow: 0 20px 60px rgba(255,215,0,0.2);
+        }
+
+        .confetti-emoji { font-size: 4rem; margin-bottom: 0.5rem; display: block; }
+        .celebration-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+        .celebration-sub {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+        .celebration-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .cel-stat { text-align: center; }
+        .cel-stat .val {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            display: block;
+        }
+        .cel-stat .lbl { font-size: 0.75rem; font-weight: 800; color: var(--muted); }
+        .cel-stat.green .val { color: var(--green-mid); }
+        .cel-stat.gold .val { color: var(--gold); }
+        .cel-stat.blue .val { color: #4a9eff; }
+
+        .celebration-btn {
+            background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            padding: 1rem 3rem;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .celebration-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(46,204,84,0.4); }
+
+        /* XP Float */
+        .xp-float {
+            position: fixed;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem;
+            color: var(--gold);
+            pointer-events: none;
+            animation: floatUp 1.2s ease forwards;
+            z-index: 9999;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
+        }
+
+        @media (max-width: 900px) {
+            .practice-layout { grid-template-columns: 1fr; }
+            .lesson-panel { order: -1; }
+        }
+        @media (max-width: 600px) {
+            .top-nav { padding: 0.8rem 1rem; }
+            .practice-layout { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<nav class="top-nav">
+    <button class="back-btn" onclick="window.location.href='learn.html'">
+        <i class="fas fa-chevron-left"></i> Back
+    </button>
+    <div class="progress-section">
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="progress-label" id="progress-label">0 / 0</div>
+    </div>
+    <div class="nav-hearts" id="hearts-container">
+        <span class="heart" id="h1">❤️</span>
+        <span class="heart" id="h2">❤️</span>
+        <span class="heart" id="h3">❤️</span>
+    </div>
+</nav>
+
+<!-- Main Layout -->
+<div class="practice-layout">
+
+    <!-- LEFT: Webcam -->
+    <div class="webcam-panel">
+        <!-- Target sign -->
+        <div class="target-sign-card">
+            <div class="target-emoji" id="target-emoji">🤟</div>
+            <div class="target-info">
+                <div class="target-label">Show this sign</div>
+                <div class="target-sign-name" id="target-name">A</div>
+                <div class="target-hint" id="target-hint">Hold your hand up clearly</div>
+            </div>
+            <button class="target-skip" onclick="skipSign()">Skip →</button>
+        </div>
+
+        <!-- Webcam -->
+        <div class="webcam-container" id="webcam-container">
+            <video id="webcam-video" autoplay playsinline muted></video>
+            <canvas id="webcam-canvas"></canvas>
+
+            <!-- Initial overlay -->
+            <div class="webcam-overlay" id="cam-overlay">
+                <div class="overlay-icon">📷</div>
+                <div class="overlay-text">Ready to practice?</div>
+                <div class="overlay-sub">We'll use your camera to detect your hand signs in real time.</div>
+                <button class="start-webcam-btn" onclick="startCamera()">
+                    <i class="fas fa-video"></i> Enable Camera
+                </button>
+            </div>
+        </div>
+
+        <!-- Detection status -->
+        <div class="detection-bar">
+            <div class="detection-dot" id="detection-dot"></div>
+            <div class="detection-label" id="detection-label">Camera not started</div>
+            <div class="confidence-track">
+                <div class="confidence-fill" id="confidence-fill"></div>
+            </div>
+            <div class="detection-confidence" id="detection-pct">—</div>
+        </div>
+
+        <!-- Capture button -->
+        <button class="capture-btn" id="capture-btn" onclick="captureSign()" disabled>
+            <i class="fas fa-camera"></i> Capture Sign
+        </button>
+    </div>
+
+    <!-- RIGHT: Lesson panel -->
+    <div class="lesson-panel">
+
+        <!-- Score -->
+        <div class="score-row">
+            <div class="score-pill correct-score">
+                <div class="score-val" id="score-correct">0</div>
+                <div class="score-lbl">Correct</div>
+            </div>
+            <div class="score-pill wrong-score">
+                <div class="score-val" id="score-wrong">0</div>
+                <div class="score-lbl">Missed</div>
+            </div>
+            <div class="score-pill xp-score">
+                <div class="score-val" id="score-xp">0</div>
+                <div class="score-lbl">XP Earned</div>
+            </div>
+        </div>
+
+        <!-- Sign reference card -->
+        <div class="lesson-card">
+            <div class="section-label">Reference</div>
+            <div class="sign-display">
+                <span class="sign-big-emoji" id="ref-emoji">🤟</span>
+                <div class="sign-letter" id="ref-letter">A</div>
+                <div class="sign-word" id="ref-word">Alpha</div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="lesson-card">
+            <div class="section-label">How to sign</div>
+            <div class="steps-list" id="steps-list">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Result feedback -->
+        <div class="result-card" id="result-card">
+            <div class="result-emoji" id="result-emoji">✅</div>
+            <div class="result-title" id="result-title">Correct!</div>
+            <div class="result-sub" id="result-sub">Great job signing that!</div>
+            <div class="result-xp" id="result-xp">+10 XP</div>
+            <button class="next-btn" id="next-btn" onclick="nextSign()">Next Sign →</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Celebration overlay -->
+<div class="celebration" id="celebration">
+    <div class="celebration-card">
+        <span class="confetti-emoji">🎉</span>
+        <div class="celebration-title">Lesson Complete!</div>
+        <div class="celebration-sub" id="cel-sub">You've finished all signs in this lesson</div>
+        <div class="celebration-stats">
+            <div class="cel-stat green">
+                <span class="val" id="cel-correct">0</span>
+                <span class="lbl">Correct</span>
+            </div>
+            <div class="cel-stat gold">
+                <span class="val" id="cel-xp">0</span>
+                <span class="lbl">XP Earned</span>
+            </div>
+            <div class="cel-stat blue">
+                <span class="val" id="cel-accuracy">0%</span>
+                <span class="lbl">Accuracy</span>
+            </div>
+        </div>
+        <button class="celebration-btn" onclick="window.location.href='learn.html'">Continue 🚀</button>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/practice.js"></script>
+</body>
+</html>

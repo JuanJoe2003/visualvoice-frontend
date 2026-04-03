@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualVoice — Learn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --green-dark: #1a7a2e;
+            --green-mid: #2ecc54;
+            --green-light: #57e07a;
+            --gold: #FFD700;
+            --gold-dark: #d4a800;
+            --bg: #0f1f13;
+            --sidebar-bg: #111d15;
+            --card-bg: #162a1b;
+            --card-bg2: #1c3322;
+            --border: #243d2b;
+            --text: #e8f5ec;
+            --muted: #7aad88;
+            --danger: #ff4757;
+            --streak: #ff6b35;
+            --xp-blue: #4a9eff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-logo {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.7rem;
+            color: var(--green-mid);
+            padding: 0.5rem 0.5rem 1.5rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-logo span { font-size: 1.5rem; }
+        .sidebar-nav { flex: 1; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            margin-bottom: 0.3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            border: 2px solid transparent;
+        }
+
+        .nav-item:hover { background: rgba(46,204,84,0.08); color: var(--green-light); }
+        .nav-item.active {
+            background: rgba(46,204,84,0.15);
+            color: var(--green-mid);
+            border-color: rgba(46,204,84,0.25);
+        }
+
+        .nav-item i { width: 20px; text-align: center; font-size: 1rem; }
+
+        .nav-divider { height: 1px; background: var(--border); margin: 0.8rem 0.5rem; }
+
+        .sidebar-user {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sidebar-user:hover { border-color: var(--green-mid); }
+        .user-info { display: flex; align-items: center; gap: 0.75rem; }
+        .user-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; font-weight: 900; color: #fff;
+            border: 2px solid var(--gold);
+            flex-shrink: 0;
+        }
+        .user-name { font-size: 0.88rem; font-weight: 800; color: var(--text); }
+        .user-level { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+
+        /* ===== MAIN ===== */
+        .main {
+            margin-left: 240px;
+            flex: 1;
+            padding: 2rem;
+            max-width: calc(100vw - 240px);
+        }
+
+        /* ===== TOP BAR ===== */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .top-bar h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            color: var(--text);
+        }
+        .top-bar p { color: var(--muted); font-size: 0.9rem; font-weight: 600; margin-top: 0.2rem; }
+
+        .top-stats { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .top-stat {
+            display: flex; align-items: center; gap: 0.4rem;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 14px; padding: 0.55rem 1rem;
+            font-size: 0.88rem; font-weight: 800; color: var(--text);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .top-stat:hover { border-color: var(--green-mid); transform: translateY(-1px); }
+        .top-stat i { font-size: 1rem; }
+        .streak-stat i { color: var(--streak); }
+        .xp-stat i { color: var(--gold); }
+
+        /* ===== UNIT PATH ===== */
+        .unit-section { margin-bottom: 3rem; }
+
+        .unit-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .unit-header::before {
+            content: '';
+            position: absolute;
+            right: -20px; top: -20px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            opacity: 0.15;
+        }
+
+        .unit-header.unit-done::before { background: radial-gradient(circle, var(--green-mid), transparent); }
+        .unit-header.unit-current::before { background: radial-gradient(circle, var(--gold), transparent); }
+        .unit-header.unit-locked::before { background: radial-gradient(circle, var(--muted), transparent); }
+
+        .unit-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .unit-meta { flex: 1; }
+        .unit-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.3rem;
+            color: var(--text);
+            margin-bottom: 0.2rem;
+        }
+        .unit-sub { font-size: 0.82rem; font-weight: 700; color: var(--muted); }
+
+        .unit-progress-wrap { margin-top: 0.5rem; }
+        .unit-bar-track {
+            height: 8px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 99px;
+            overflow: hidden;
+            width: 200px;
+            margin-top: 0.4rem;
+        }
+        .unit-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1s ease;
+        }
+        .fill-green { background: linear-gradient(90deg, var(--green-mid), var(--green-light)); }
+        .fill-gold { background: linear-gradient(90deg, var(--gold-dark), var(--gold)); }
+        .fill-blue { background: linear-gradient(90deg, #4a9eff, #7bb8ff); }
+
+        .unit-badge {
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+        .badge-done { background: rgba(46,204,84,0.15); color: var(--green-mid); border: 1px solid rgba(46,204,84,0.3); }
+        .badge-current { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
+        .badge-locked { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+
+        /* ===== LESSON GRID ===== */
+        .lessons-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        /* Connecting line */
+        .lessons-grid::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 30px;
+            bottom: 30px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--border), transparent);
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .lesson-row {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        /* Zigzag offsets */
+        .lesson-row:nth-child(1) { justify-content: flex-start; padding-left: 10%; }
+        .lesson-row:nth-child(2) { justify-content: center; }
+        .lesson-row:nth-child(3) { justify-content: flex-end; padding-right: 10%; }
+        .lesson-row:nth-child(4) { justify-content: center; }
+        .lesson-row:nth-child(5) { justify-content: flex-start; padding-left: 10%; }
+        .lesson-row:nth-child(6) { justify-content: center; }
+        .lesson-row:nth-child(7) { justify-content: flex-end; padding-right: 10%; }
+        .lesson-row:nth-child(8) { justify-content: center; }
+
+        .lesson-node {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .lesson-node:hover { transform: scale(1.05); }
+        .lesson-node.locked { cursor: default; }
+        .lesson-node.locked:hover { transform: none; }
+
+        .lesson-btn {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 4px solid transparent;
+            position: relative;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .lesson-btn.done {
+            background: linear-gradient(135deg, var(--green-dark), #1f6b30);
+            border-color: var(--green-mid);
+        }
+
+        .lesson-btn.current {
+            background: linear-gradient(135deg, #2a5c1a, #1f8c3a);
+            border-color: var(--gold);
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 0 rgba(255,215,0,0.4); }
+            50% { box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 12px rgba(255,215,0,0); }
+        }
+
+        .lesson-btn.locked-btn {
+            background: linear-gradient(135deg, #1a2e1f, #162a1b);
+            border-color: var(--border);
+            opacity: 0.7;
+        }
+
+        .lesson-label {
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--muted);
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .lesson-node.done .lesson-label { color: var(--green-light); }
+        .lesson-node.current-node .lesson-label { color: var(--gold); }
+
+        .checkmark {
+            position: absolute;
+            bottom: -2px; right: -2px;
+            width: 22px; height: 22px;
+            background: var(--green-mid);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem;
+            color: #fff;
+            font-weight: 900;
+            border: 2px solid var(--bg);
+        }
+
+        .star-badge {
+            position: absolute;
+            top: -6px; right: -6px;
+            font-size: 1rem;
+            animation: spin 4s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== LESSON TOOLTIP / POPUP ===== */
+        .lesson-popup {
+            position: fixed;
+            z-index: 999;
+            background: var(--card-bg2);
+            border: 2px solid var(--green-mid);
+            border-radius: 20px;
+            padding: 1.2rem 1.5rem;
+            width: 260px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            display: none;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .lesson-popup.show { display: flex; animation: popIn 0.25s ease; }
+        @keyframes popIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .popup-emoji { font-size: 2.5rem; text-align: center; }
+        .popup-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            color: var(--text);
+            text-align: center;
+        }
+        .popup-sub { font-size: 0.8rem; color: var(--muted); font-weight: 700; text-align: center; }
+
+        .popup-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.6rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .popup-stat { font-size: 0.78rem; font-weight: 800; color: var(--text); text-align: center; }
+        .popup-stat span { display: block; color: var(--muted); font-size: 0.7rem; font-weight: 700; }
+
+        .popup-start-btn {
+            background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .popup-start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(46,204,84,0.35); }
+        .popup-close {
+            position: absolute;
+            top: 0.7rem; right: 0.9rem;
+            background: none; border: none;
+            color: var(--muted); cursor: pointer;
+            font-size: 1.1rem;
+        }
+        .popup-close:hover { color: var(--text); }
+
+        /* ===== MOBILE HAMBURGER ===== */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 1rem; left: 1rem;
+            z-index: 200;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.5rem 0.65rem;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; max-width: 100vw; padding: 1.5rem 1rem; padding-top: 4rem; }
+            .hamburger { display: flex; }
+            .lesson-row:nth-child(odd) { justify-content: flex-start !important; padding-left: 5% !important; }
+            .lesson-row:nth-child(even) { justify-content: flex-end !important; padding-right: 5% !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hamburger -->
+<button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span>🤟</span> VisualVoice</div>
+    <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="learn.html" class="nav-item active"><i class="fas fa-graduation-cap"></i> Learn</a>
+        <a href="practice.html" class="nav-item"><i class="fas fa-camera"></i> Practice</a>
+        <a href="progress.html" class="nav-item"><i class="fas fa-chart-bar"></i> Progress</a>
+        <a href="trophies.html" class="nav-item"><i class="fas fa-trophy"></i> Trophies</a>
+        <a href="leaderboard.html" class="nav-item"><i class="fas fa-users"></i> Leaderboard</a>
+        <div class="nav-divider"></div>
+        <a href="#" class="nav-item"><i class="fas fa-store"></i> Shop</a>
+        <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+        <a href="login.html" class="nav-item"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="user-info">
+            <div class="user-avatar">A</div>
+            <div>
+                <div class="user-name">Alex Rivera</div>
+                <div class="user-level">⚡ Level 12 · Gold League</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+    <div class="top-bar">
+        <div>
+            <h1>📚 Learn ASL</h1>
+            <p>Pick up where you left off — keep that streak alive!</p>
+        </div>
+        <div class="top-stats">
+            <div class="top-stat streak-stat"><i class="fas fa-fire"></i> 14</div>
+            <div class="top-stat xp-stat"><i class="fas fa-bolt"></i> 850 XP</div>
+        </div>
+    </div>
+
+    <div id="units-container"></div>
+</main>
+
+<!-- Lesson Popup -->
+<div class="lesson-popup" id="lesson-popup">
+    <button class="popup-close" onclick="closePopup()"><i class="fas fa-times"></i></button>
+    <div class="popup-emoji" id="popup-emoji">🤟</div>
+    <div class="popup-title" id="popup-title">Lesson Title</div>
+    <div class="popup-sub" id="popup-sub">Practice this sign</div>
+    <div class="popup-stats">
+        <div class="popup-stat" id="popup-xp">+10 XP<span>Reward</span></div>
+        <div class="popup-stat" id="popup-time">~3 min<span>Duration</span></div>
+        <div class="popup-stat" id="popup-stars">⭐⭐⭐<span>Best</span></div>
+    </div>
+    <button class="popup-start-btn" id="popup-btn" onclick="startLesson()">Start Lesson 🚀</button>
+</div>
+
+<script src="js/learn.js"></script>
+</body>
+</html>
